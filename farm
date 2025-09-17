@@ -1,0 +1,56 @@
+--// Start OFF by default
+getgenv().Farm = false
+
+--// Services
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer
+
+--// Remotes
+local Ragdoll = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Ragdoll")
+
+--// Waypoints
+local waypoints = {
+    Vector3.new(-6.749691009521484, 1911.3406982421875, -303.1607360839844),
+    Vector3.new(41.95211410522461, 1781.2840576171875, -638.9027099609375),
+    Vector3.new(-36.82999038696289, 1336.283203125, -1812.828125),
+}
+
+--// Get HumanoidRootPart safely
+local function getRoot()
+    local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    return char:WaitForChild("HumanoidRootPart", 5)
+end
+
+--// Farm loop
+local function farmLoop()
+    while getgenv().Farm do
+        local root = getRoot()
+
+        if root then
+            -- cycle through waypoints
+            for _, pos in ipairs(waypoints) do
+                if not getgenv().Farm then break end
+                root.CFrame = CFrame.new(pos)
+                task.wait(3) -- 3s between each teleport
+            end
+        end
+
+        -- Fire ragdoll remote once each cycle
+        if getgenv().Farm then
+            firesignal(Ragdoll.OnClientEvent)
+        end
+
+        task.wait(20) -- wait 20s before next cycle
+    end
+end
+
+--// Auto-restart loop if stopped
+task.spawn(function()
+    while true do
+        if getgenv().Farm then
+            farmLoop()
+        end
+        task.wait(1)
+    end
+end)
