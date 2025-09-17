@@ -9,7 +9,7 @@ local LocalPlayer = Players.LocalPlayer
 --// Remotes
 local Ragdoll = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Ragdoll")
 
---// Waypoints
+--// Waypoints (edit/add as needed)
 local waypoints = {
     Vector3.new(-6.749691009521484, 1911.3406982421875, -303.1607360839844),
     Vector3.new(41.95211410522461, 1781.2840576171875, -638.9027099609375),
@@ -38,7 +38,10 @@ local function farmLoop()
 
         -- Fire ragdoll remote once each cycle
         if getgenv().Farm then
-            firesignal(Ragdoll.OnClientEvent)
+            -- safer to use FireServer (if server expects it)
+            pcall(function()
+                Ragdoll:FireServer()
+            end)
         end
 
         task.wait(20) -- wait 20s before next cycle
